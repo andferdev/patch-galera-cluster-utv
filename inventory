@@ -1,0 +1,6 @@
+[empty_group]
+
+[galera_test]
+mariadb01-test.kb.se guest_name=SRVVM1203-mariadb01-test.kb.se
+mariadb02-test.kb.se guest_name=SRVVM1204-mariadb02-test.kb.se
+mariadb03-test.kb.se guest_name=SRVVM1205-mariadb03-test.kb.se

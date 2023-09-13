@@ -1,0 +1,159 @@
+---
+- hosts: all
+  serial: 1
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - ~/playbooks/my_vault.yml
+#  remote_user: '{{ rmt_user }}'
+  vars:
+    #vcenter_hostname: 'srvvm1001.kb.local'
+    vcenter_hostname: 'vcenterkb2001.kb.local'
+    vcenter_username: 'andfera'
+    vcenter_password: '{{ vcenter_password }}'
+    datacenter_name: 'KB Datacenter 8'
+
+  tasks:
+    - name: List our guests
+      ansible.builtin.debug:
+        msg: "{{ guest_name }}"
+
+    - name: Check if /usr/local/bin/pre_patch.sh exists.
+      stat:
+        path: /usr/local/bin/pre_patch.sh
+      register: pre_patch_exists
+
+  # Put actual node in maintenance mode in MaxScale
+  # This part is for MariaDB01
+    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb01-test
+      ansible.builtin.command: "maxctrl set server mariadb01-test maintenance"
+      when:
+        - inventory_hostname == "mariadb01-test.kb.se"  
+
+    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb02-test
+      ansible.builtin.command: "maxctrl set server mariadb01-test maintenance"
+      when:
+        - inventory_hostname == "mariadb01-test.kb.se"
+      delegate_to: "mariadb02-test.kb.se"
+
+  # This part is for MariaDB02
+    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb01-test
+      ansible.builtin.command: "maxctrl set server mariadb02-test maintenance"
+      when:
+        - inventory_hostname == "mariadb02-test.kb.se"  
+
+    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb02-test
+      ansible.builtin.command: "maxctrl set server mariadb02-test maintenance"
+      when:
+        - inventory_hostname == "mariadb02-test.kb.se"
+      delegate_to: "mariadb01-test.kb.se"
+
+  # This part is for MariaDB03
+    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb01-test
+      ansible.builtin.command: "maxctrl set server mariadb03-test maintenance"
+      when:
+        - inventory_hostname == "mariadb03-test.kb.se"
+      delegate_to: "mariadb01-test.kb.se" 
+
+    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb02-test
+      ansible.builtin.command: "maxctrl set server mariadb03-test maintenance"
+      when:
+        - inventory_hostname == "mariadb03-test.kb.se"
+      delegate_to: "mariadb02-test.kb.se"
+    - pause:
+        minutes: 1
+
+  # Check sessions before stopping DB
+
+    - name: Stop service mariadb, if started
+      service:
+        name: mariadb
+        state: stopped
+
+    - pause:
+        minutes: 1
+
+    - name: Get timestamp from the system
+      shell: "date '+%Y-%m-%d %H-%M-%S'"
+      register: tstamp
+
+    - name: Create a snapshot
+      community.vmware.vmware_guest_snapshot:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "{{ datacenter_name }}"
+        folder: "/{{ datacenter_name }}/vm/Linux/MariaDB"
+        name: "{{ guest_name }}"
+        validate_certs: false
+        state: present
+        snapshot_name: "Snapshot: {{ tstamp.stdout }}"
+        description: snapshot_description
+      delegate_to: localhost
+
+    - name: Update all installed packages using YUM module
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+        update_only: yes
+      register: yum_update_status
+      async: 7200
+      poll: 15
+
+    - name: Reboot when packages were updated
+      reboot:
+      when:
+        - yum_update_status.changed == true
+
+    - name: Start service mariadb, if no reboot is performed
+      service:
+        name: mariadb
+        state: started
+
+    - pause:
+        minutes: 1
+
+  # Remove maintenance mode in MaxScale for actual server
+  # This part is for MariaDB01
+    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb01-test
+      ansible.builtin.command: "maxctrl clear server mariadb01-test maintenance"
+      when:
+        - inventory_hostname == "mariadb01-test.kb.se"  
+
+    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb02-test
+      ansible.builtin.command: "maxctrl clear server mariadb01-test maintenance"
+      when:
+        - inventory_hostname == "mariadb01-test.kb.se"
+      delegate_to: "mariadb02-test.kb.se"
+
+  # This part is for MariaDB02
+    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb01-test
+      ansible.builtin.command: "maxctrl clear server mariadb02-test maintenance"
+      when:
+        - inventory_hostname == "mariadb02-test.kb.se"  
+
+    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb02-test
+      ansible.builtin.command: "maxctrl clear server mariadb02-test maintenance"
+      when:
+        - inventory_hostname == "mariadb02-test.kb.se"
+      delegate_to: "mariadb01-test.kb.se"
+
+  # This part is for MariaDB03
+    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb01-test
+      ansible.builtin.command: "maxctrl clear server mariadb03-test maintenance"
+      when:
+        - inventory_hostname == "mariadb03-test.kb.se"
+      delegate_to: "mariadb01-test.kb.se" 
+
+    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb02-test
+      ansible.builtin.command: "maxctrl clear server mariadb03-test maintenance"
+      when:
+        - inventory_hostname == "mariadb03-test.kb.se"
+      delegate_to: "mariadb02-test.kb.se"
+    - pause:
+        minutes: 1
+
+    - name: Remove packages not needed anymore
+      yum:
+        autoremove: yes
