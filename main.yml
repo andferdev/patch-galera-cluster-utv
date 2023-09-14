@@ -25,43 +25,43 @@
 
   # Put actual node in maintenance mode in MaxScale
   # This part is for MariaDB01
-    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb01-test
-      ansible.builtin.command: "maxctrl set server mariadb01-test maintenance"
+    - name: Update MaxScale and set mariadb01-utv in manintenance mode on mariadb01-utv
+      ansible.builtin.command: "maxctrl set server mariadb01-utv maintenance"
       when:
-        - inventory_hostname == "mariadb01-test.kb.se"  
+        - inventory_hostname == "mariadb01-utv.kb.se"  
 
-    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb02-test
-      ansible.builtin.command: "maxctrl set server mariadb01-test maintenance"
+    - name: Update MaxScale and set mariadb01-utv in manintenance mode on mariadb02-utv
+      ansible.builtin.command: "maxctrl set server mariadb01-utv maintenance"
       when:
-        - inventory_hostname == "mariadb01-test.kb.se"
-      delegate_to: "mariadb02-test.kb.se"
+        - inventory_hostname == "mariadb01-utv.kb.se"
+      delegate_to: "mariadb02-utv.kb.se"
 
   # This part is for MariaDB02
-    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb01-test
-      ansible.builtin.command: "maxctrl set server mariadb02-test maintenance"
+    - name: Update MaxScale and set mariadb02-utv in manintenance mode on mariadb01-utv
+      ansible.builtin.command: "maxctrl set server mariadb02-utv maintenance"
       when:
-        - inventory_hostname == "mariadb02-test.kb.se"  
+        - inventory_hostname == "mariadb02-utv.kb.se"  
 
-    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb02-test
-      ansible.builtin.command: "maxctrl set server mariadb02-test maintenance"
+    - name: Update MaxScale and set mariadb02-utv in manintenance mode on mariadb02-utv
+      ansible.builtin.command: "maxctrl set server mariadb02-utv maintenance"
       when:
-        - inventory_hostname == "mariadb02-test.kb.se"
-      delegate_to: "mariadb01-test.kb.se"
+        - inventory_hostname == "mariadb02-utv.kb.se"
+      delegate_to: "mariadb01-utv.kb.se"
 
   # This part is for MariaDB03
-    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb01-test
-      ansible.builtin.command: "maxctrl set server mariadb03-test maintenance"
+    - name: Update MaxScale and set mariadb03-utv in manintenance mode on mariadb01-utv
+      ansible.builtin.command: "maxctrl set server mariadb03-utv maintenance"
       when:
-        - inventory_hostname == "mariadb03-test.kb.se"
-      delegate_to: "mariadb01-test.kb.se" 
+        - inventory_hostname == "mariadb03-utv.kb.se"
+      delegate_to: "mariadb01-utv.kb.se" 
 
-    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb02-test
-      ansible.builtin.command: "maxctrl set server mariadb03-test maintenance"
+    - name: Update MaxScale and set mariadb03-utv in manintenance mode on mariadb02-utv
+      ansible.builtin.command: "maxctrl set server mariadb03-utv maintenance"
       when:
-        - inventory_hostname == "mariadb03-test.kb.se"
-      delegate_to: "mariadb02-test.kb.se"
+        - inventory_hostname == "mariadb03-utv.kb.se"
+      delegate_to: "mariadb02-utv.kb.se"
     - pause:
-        minutes: 1
+        minutes: 15
 
   # Check sessions before stopping DB
 
@@ -71,7 +71,7 @@
         state: stopped
 
     - pause:
-        minutes: 1
+        minutes: 2
 
     - name: Get timestamp from the system
       shell: "date '+%Y-%m-%d %H-%M-%S'"
@@ -112,45 +112,45 @@
         state: started
 
     - pause:
-        minutes: 1
+        minutes: 2
 
   # Remove maintenance mode in MaxScale for actual server
   # This part is for MariaDB01
-    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb01-test
-      ansible.builtin.command: "maxctrl clear server mariadb01-test maintenance"
+    - name: Update MaxScale and set mariadb01-utv in manintenance mode on mariadb01-utv
+      ansible.builtin.command: "maxctrl clear server mariadb01-utv maintenance"
       when:
-        - inventory_hostname == "mariadb01-test.kb.se"  
+        - inventory_hostname == "mariadb01-utv.kb.se"  
 
-    - name: Update MaxScale and set mariadb01-test in manintenance mode on mariadb02-test
-      ansible.builtin.command: "maxctrl clear server mariadb01-test maintenance"
+    - name: Update MaxScale and set mariadb01-utv in manintenance mode on mariadb02-utv
+      ansible.builtin.command: "maxctrl clear server mariadb01-utv maintenance"
       when:
-        - inventory_hostname == "mariadb01-test.kb.se"
-      delegate_to: "mariadb02-test.kb.se"
+        - inventory_hostname == "mariadb01-utv.kb.se"
+      delegate_to: "mariadb02-utv.kb.se"
 
   # This part is for MariaDB02
-    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb01-test
-      ansible.builtin.command: "maxctrl clear server mariadb02-test maintenance"
+    - name: Update MaxScale and set mariadb02-utv in manintenance mode on mariadb01-utv
+      ansible.builtin.command: "maxctrl clear server mariadb02-utv maintenance"
       when:
-        - inventory_hostname == "mariadb02-test.kb.se"  
+        - inventory_hostname == "mariadb02-utv.kb.se"  
 
-    - name: Update MaxScale and set mariadb02-test in manintenance mode on mariadb02-test
-      ansible.builtin.command: "maxctrl clear server mariadb02-test maintenance"
+    - name: Update MaxScale and set mariadb02-utv in manintenance mode on mariadb02-utv
+      ansible.builtin.command: "maxctrl clear server mariadb02-utv maintenance"
       when:
-        - inventory_hostname == "mariadb02-test.kb.se"
-      delegate_to: "mariadb01-test.kb.se"
+        - inventory_hostname == "mariadb02-utv.kb.se"
+      delegate_to: "mariadb01-utv.kb.se"
 
   # This part is for MariaDB03
-    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb01-test
-      ansible.builtin.command: "maxctrl clear server mariadb03-test maintenance"
+    - name: Update MaxScale and set mariadb03-utv in manintenance mode on mariadb01-utv
+      ansible.builtin.command: "maxctrl clear server mariadb03-utv maintenance"
       when:
-        - inventory_hostname == "mariadb03-test.kb.se"
-      delegate_to: "mariadb01-test.kb.se" 
+        - inventory_hostname == "mariadb03-utv.kb.se"
+      delegate_to: "mariadb01-utv.kb.se" 
 
-    - name: Update MaxScale and set mariadb03-test in manintenance mode on mariadb02-test
-      ansible.builtin.command: "maxctrl clear server mariadb03-test maintenance"
+    - name: Update MaxScale and set mariadb03-utv in manintenance mode on mariadb02-utv
+      ansible.builtin.command: "maxctrl clear server mariadb03-utv maintenance"
       when:
-        - inventory_hostname == "mariadb03-test.kb.se"
-      delegate_to: "mariadb02-test.kb.se"
+        - inventory_hostname == "mariadb03-utv.kb.se"
+      delegate_to: "mariadb02-utv.kb.se"
     - pause:
         minutes: 1
 
