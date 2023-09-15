@@ -87,8 +87,8 @@
         name: "{{ guest_name }}"
         validate_certs: false
         state: present
-        snapshot_name: "Snapshot: {{ tstamp.stdout }}"
-        description: snapshot_description
+        snapshot_name: "Snapshot: {{ guest_name }}_{{ tstamp.stdout }}"
+        description: snapshot before patch
       delegate_to: localhost
 
     - name: Update all installed packages using YUM module
